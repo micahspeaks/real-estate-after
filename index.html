@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luxury Homes - Real Estate</title>
+<title>3D Property Tour - Luxury Homes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 * {
   margin: 0;
@@ -12,499 +13,341 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #1f2937;
-  overflow-x: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, sans-serif;
+  color: #333;
+  overflow: hidden;
+}
+
+#canvas {
+  display: block;
+  width: 100%;
+  height: 100vh;
+}
+
+.ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
 }
 
 header {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  color: white;
-  padding: 100px 20px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-header::before {
-  content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: moveBackground 20s linear infinite;
-}
-
-@keyframes moveBackground {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(50px, 50px); }
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 header h1 {
-  font-size: 56px;
-  font-weight: 700;
-  margin-bottom: 15px;
-  position: relative;
-  z-index: 2;
-  animation: slideInDown 0.8s ease-out;
-}
-
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  font-size: 32px;
+  margin-bottom: 5px;
 }
 
 header p {
-  font-size: 22px;
-  opacity: 0.9;
-  position: relative;
-  z-index: 2;
-  animation: slideInUp 0.8s ease-out 0.2s both;
+  font-size: 14px;
+  opacity: 0.8;
 }
 
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-nav {
-  background: white;
-  padding: 20px;
-  text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-nav a {
-  margin: 0 25px;
-  text-decoration: none;
-  color: #333;
-  font-weight: 600;
-  font-size: 15px;
-  transition: color 0.3s ease;
-}
-
-nav a:hover {
-  color: #d4af37;
-}
-
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.hero-cta {
-  background: #d4af37;
-  color: #1a1a1a;
-  padding: 16px 40px;
-  border: none;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 2;
-  margin-top: 30px;
-  animation: fadeIn 0.8s ease-out 0.4s both;
-}
-
-.hero-cta:hover {
-  background: #f4d66d;
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
-}
-
-.featured {
-  text-align: center;
-  margin: 80px 0 50px;
-}
-
-.featured h2 {
-  font-size: 42px;
-  font-weight: 700;
-  margin-bottom: 50px;
-  color: #1f2937;
-}
-
-.properties-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 30px;
-  margin-bottom: 60px;
-}
-
-.property-card {
-  background: white;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-  cursor: pointer;
-}
-
-.property-card:hover {
-  transform: translateY(-15px);
-  box-shadow: 0 30px 60px rgba(212, 175, 55, 0.2);
-}
-
-.property-image {
-  width: 100%;
-  height: 280px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.property-image::before {
-  content: '';
+.controls {
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  transition: left 0.6s ease;
-}
-
-.property-card:hover .property-image::before {
-  left: 100%;
-}
-
-.property-info {
-  padding: 30px;
-}
-
-.property-price {
-  font-size: 28px;
-  font-weight: 700;
-  color: #d4af37;
-  margin-bottom: 10px;
-}
-
-.property-address {
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 15px;
-  font-weight: 500;
-}
-
-.property-details {
-  display: flex;
-  justify-content: space-around;
-  margin: 20px 0;
-  padding: 20px 0;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-}
-
-.detail-item {
-  text-align: center;
-}
-
-.detail-number {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.detail-label {
-  font-size: 12px;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.view-btn {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 15px;
-}
-
-.view-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-}
-
-.stats {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 60px 20px;
-  margin: 60px 0;
-  border-radius: 15px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 30px;
-  text-align: center;
-}
-
-.stat-box {
-  animation: fadeInUp 0.6s ease-out backwards;
-}
-
-.stat-box:nth-child(1) { animation-delay: 0s; }
-.stat-box:nth-child(2) { animation-delay: 0.1s; }
-.stat-box:nth-child(3) { animation-delay: 0.2s; }
-.stat-box:nth-child(4) { animation-delay: 0.3s; }
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.stat-number {
-  font-size: 42px;
-  font-weight: 700;
-  color: #d4af37;
-}
-
-.stat-label {
-  font-size: 15px;
-  color: #666;
-  margin-top: 10px;
-}
-
-.cta-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 80px 20px;
-  text-align: center;
-  border-radius: 15px;
-  margin: 60px 0;
-}
-
-.cta-section h2 {
-  font-size: 42px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.cta-section p {
-  font-size: 18px;
-  opacity: 0.95;
-  margin-bottom: 40px;
-}
-
-.cta-btn {
-  background: #d4af37;
-  color: #1a1a1a;
-  padding: 16px 50px;
-  border: none;
+  padding: 20px 30px;
   border-radius: 50px;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.cta-btn:hover {
-  background: #f4d66d;
-  transform: scale(1.05);
-  box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
-}
-
-footer {
-  background: #1a1a1a;
-  color: white;
   text-align: center;
-  padding: 40px 20px;
+  pointer-events: auto;
+  z-index: 100;
 }
 
-footer a {
+.controls p {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.info-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 300px;
+  pointer-events: auto;
+  z-index: 100;
+}
+
+.info-panel h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
   color: #d4af37;
-  text-decoration: none;
 }
 
-@media (max-width: 768px) {
-  header h1 {
-    font-size: 32px;
-  }
+.info-panel p {
+  font-size: 13px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
 
-  header p {
-    font-size: 16px;
-  }
-
-  .featured h2 {
-    font-size: 28px;
-  }
-
-  .properties-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .cta-section h2 {
-    font-size: 28px;
-  }
-
-  nav a {
-    margin: 0 15px;
-    font-size: 13px;
-  }
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 18px;
+  z-index: 200;
 }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Luxury Homes</h1>
-  <p>Find Your Dream Property</p>
-  <button class="hero-cta">Browse Properties</button>
-</header>
+<div id="canvas"></div>
+<div class="ui-overlay">
+  <header>
+    <h1>Luxury Estate 3D Tour</h1>
+    <p>Interactive Virtual Walkthrough</p>
+  </header>
 
-<nav>
-  <a href="#home">Home</a>
-  <a href="#properties">Properties</a>
-  <a href="#about">About</a>
-  <a href="#contact">Contact</a>
-</nav>
+  <div class="info-panel">
+    <h3>Property Details</h3>
+    <p><strong>Price:</strong> $1,250,000</p>
+    <p><strong>Location:</strong> Luxury Hills, CA</p>
+    <p><strong>Bedrooms:</strong> 4</p>
+    <p><strong>Bathrooms:</strong> 3</p>
+    <p><strong>Square Feet:</strong> 4,500</p>
+  </div>
 
-<div class="container">
-
-  <section class="featured" id="properties">
-    <h2>Featured Properties</h2>
-    
-    <div class="properties-grid">
-      <div class="property-card">
-        <div class="property-image">Modern Luxury Estate</div>
-        <div class="property-info">
-          <div class="property-price">$1,250,000</div>
-          <div class="property-address">Luxury Hills, California</div>
-          <div class="property-details">
-            <div class="detail-item">
-              <div class="detail-number">4</div>
-              <div class="detail-label">Bedrooms</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-number">3</div>
-              <div class="detail-label">Bathrooms</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-number">4500</div>
-              <div class="detail-label">Sq Ft</div>
-            </div>
-          </div>
-          <button class="view-btn">View Details</button>
-        </div>
-      </div>
-
-      <div class="property-card">
-        <div class="property-image">Downtown Penthouse</div>
-        <div class="property-info">
-          <div class="property-price">$950,000</div>
-          <div class="property-address">Downtown Manhattan, NY</div>
-          <div class="property-details">
-            <div class="detail-item">
-              <div class="detail-number">3</div>
-              <div class="detail-label">Bedrooms</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-number">2</div>
-              <div class="detail-label">Bathrooms</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-number">3200</div>
-              <div class="detail-label">Sq Ft</div>
-            </div>
-          </div>
-          <button class="view-btn">View Details</button>
-        </div>
-      </div>
-
-      <div class="property-card">
-        <div class="property-image">Beachfront Villa</div>
-        <div class="property-info">
-          <div class="property-price">$2,100,000</div>
-          <div class="property-address">Miami Beach, Florida</div>
-          <div class="property-details">
-            <div class="detail-item">
-              <div class="detail-number">5</div>
-              <div class="detail-label">Bedrooms</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-number">4</div>
-              <div class="detail-label">Bathrooms</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-number">6000</div>
-              <div class="detail-label">Sq Ft</div>
-            </div>
-          </div>
-          <button class="view-btn">View Details</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="stats">
-    <div class="stat-box">
-      <div class="stat-number">2500+</div>
-      <div class="stat-label">Properties Listed</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-number">15k+</div>
-      <div class="stat-label">Happy Customers</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-number">$5B+</div>
-      <div class="stat-label">Transactions</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-number">50+</div>
-      <div class="stat-label">Expert Agents</div>
-    </div>
-  </section>
-
-  <section class="cta-section" id="contact">
-    <h2>Ready to Find Your Home?</h2>
-    <p>Connect with our expert agents today and discover your next property.</p>
-    <button class="cta-btn">Get Started Now</button>
-  </section>
-
+  <div class="controls">
+    <p>🖱️ <strong>Drag to Look Around</strong></p>
+    <p>📱 Touch & Drag on Mobile</p>
+  </div>
 </div>
 
-<footer>
-  <p>&copy; 2024 Luxury Homes Real Estate. All rights reserved. | <a href="#">Privacy</a> | <a href="#">Terms</a></p>
-</footer>
+<script>
+// Set up scene
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 100, 1000);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 2, 20);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+document.getElementById('canvas').appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambientLight);
+
+const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+sunLight.position.set(50, 50, 50);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.width = 2048;
+sunLight.shadow.mapSize.height = 2048;
+sunLight.shadow.camera.far = 500;
+scene.add(sunLight);
+
+// Ground
+const groundGeometry = new THREE.PlaneGeometry(200, 200);
+const groundMaterial = new THREE.MeshStandardMaterial({ 
+  color: 0x2d5016,
+  roughness: 0.8,
+  metalness: 0
+});
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.rotation.x = -Math.PI / 2;
+ground.castShadow = true;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Main house structure
+const mainBody = new THREE.Group();
+
+// House base
+const houseGeometry = new THREE.BoxGeometry(30, 25, 40);
+const houseMaterial = new THREE.MeshStandardMaterial({ 
+  color: 0xf5f5dc,
+  roughness: 0.6,
+  metalness: 0.1
+});
+const houseBase = new THREE.Mesh(houseGeometry, houseMaterial);
+houseBase.position.y = 12.5;
+houseBase.castShadow = true;
+houseBase.receiveShadow = true;
+mainBody.add(houseBase);
+
+// Roof
+const roofGeometry = new THREE.ConeGeometry(25, 15, 4);
+const roofMaterial = new THREE.MeshStandardMaterial({ 
+  color: 0x8b4513,
+  roughness: 0.8,
+  metalness: 0
+});
+const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+roof.position.y = 37.5;
+roof.castShadow = true;
+roof.receiveShadow = true;
+mainBody.add(roof);
+
+// Windows
+for (let i = 0; i < 3; i++) {
+  const windowGeometry = new THREE.BoxGeometry(4, 4, 0.5);
+  const windowMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0x87ceeb,
+    roughness: 0.1,
+    metalness: 0.5
+  });
+  const window1 = new THREE.Mesh(windowGeometry, windowMaterial);
+  window1.position.set(-10 + i * 10, 20, -20);
+  window1.castShadow = true;
+  mainBody.add(window1);
+
+  const window2 = new THREE.Mesh(windowGeometry, windowMaterial);
+  window2.position.set(-10 + i * 10, 20, 20);
+  window2.castShadow = true;
+  mainBody.add(window2);
+}
+
+// Door
+const doorGeometry = new THREE.BoxGeometry(4, 8, 0.5);
+const doorMaterial = new THREE.MeshStandardMaterial({ 
+  color: 0x8b4513,
+  roughness: 0.6,
+  metalness: 0
+});
+const door = new THREE.Mesh(doorGeometry, doorMaterial);
+door.position.set(0, 4, -20);
+door.castShadow = true;
+mainBody.add(door);
+
+// Porch/Deck
+const porchGeometry = new THREE.BoxGeometry(35, 1, 8);
+const porchMaterial = new THREE.MeshStandardMaterial({ 
+  color: 0xd4a574,
+  roughness: 0.7,
+  metalness: 0
+});
+const porch = new THREE.Mesh(porchGeometry, porchMaterial);
+porch.position.set(0, 0.5, -24);
+porch.castShadow = true;
+porch.receiveShadow = true;
+mainBody.add(porch);
+
+// Pillars/Columns
+for (let i = -15; i <= 15; i += 10) {
+  const pillarGeometry = new THREE.CylinderGeometry(1.5, 1.5, 12, 8);
+  const pillarMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0xffffff,
+    roughness: 0.5,
+    metalness: 0
+  });
+  const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+  pillar.position.set(i, 6, -24);
+  pillar.castShadow = true;
+  mainBody.add(pillar);
+}
+
+scene.add(mainBody);
+
+// Trees for ambiance
+function createTree(x, z) {
+  const trunkGeometry = new THREE.CylinderGeometry(2, 2, 15, 8);
+  const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x654321 });
+  const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+  trunk.position.set(x, 7.5, z);
+  trunk.castShadow = true;
+  scene.add(trunk);
+
+  const foliageGeometry = new THREE.SphereGeometry(12, 8, 8);
+  const foliageMaterial = new THREE.MeshStandardMaterial({ color: 0x228b22 });
+  const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+  foliage.position.set(x, 25, z);
+  foliage.castShadow = true;
+  scene.add(foliage);
+}
+
+createTree(-40, -30);
+createTree(40, -30);
+createTree(-45, 30);
+createTree(45, 30);
+
+// Mouse controls for camera rotation
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+
+document.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  previousMousePosition = { x: e.clientX, y: e.clientY };
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    const deltaX = e.clientX - previousMousePosition.x;
+    const deltaY = e.clientY - previousMousePosition.y;
+
+    camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), -deltaX * 0.005);
+    camera.position.applyAxisAngle(camera.getWorldDirection(new THREE.Vector3()).cross(new THREE.Vector3(0, 1, 0)), -deltaY * 0.005);
+    camera.lookAt(0, 10, 0);
+
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+// Touch controls
+let touchStart = { x: 0, y: 0 };
+
+document.addEventListener('touchstart', (e) => {
+  touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+});
+
+document.addEventListener('touchmove', (e) => {
+  const touchCurrent = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  const deltaX = touchCurrent.x - touchStart.x;
+  const deltaY = touchCurrent.y - touchStart.y;
+
+  camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), -deltaX * 0.005);
+  camera.position.applyAxisAngle(camera.getWorldDirection(new THREE.Vector3()).cross(new THREE.Vector3(0, 1, 0)), -deltaY * 0.005);
+  camera.lookAt(0, 10, 0);
+
+  touchStart = touchCurrent;
+});
+
+// Handle window resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Subtle animation
+let time = 0;
+function animate() {
+  time += 0.01;
+  
+  // Gentle floating animation
+  mainBody.position.y = Math.sin(time * 0.5) * 0.3;
+  
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
 
 </body>
 </html>
